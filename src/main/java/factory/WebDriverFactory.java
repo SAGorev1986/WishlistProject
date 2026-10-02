@@ -1,50 +1,40 @@
 package factory;
 
-import enums.Browser;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
-/**
- * Фабрика для создания экземпляров WebDriver.
- */
 public class WebDriverFactory {
 
-    /**
-     * Создает WebDriver без дополнительных опций.
-     * @param browserName имя браузера
-     * @return настроенный WebDriver
-     */
     public static WebDriver createNewDriver(String browserName) {
-        return createNewDriver(browserName, null);
-    }
-
-    /**
-     * Создает WebDriver с опциональными настройками.
-     * @param browserName имя браузера
-     * @param options опции браузера (ChromeOptions, FirefoxOptions и т.д.)
-     * @return настроенный WebDriver
-     */
-    public static WebDriver createNewDriver(String browserName, Object options) {
-        Browser browser = Browser.fromString(browserName);
-        WebDriver driver;
-
-        switch (browser) {
-            case CHROME:
-                WebDriverManager.chromedriver().setup();
-                driver = (options != null) ? new ChromeDriver((ChromeOptions) options) : new ChromeDriver();
-                break;
-            case FIREFOX:
-                WebDriverManager.firefoxdriver().setup();
-                driver = (options != null) ? new FirefoxDriver((FirefoxOptions) options) : new FirefoxDriver();
-                break;
-            default:
-                throw new IllegalArgumentException("Неподдерживаемый браузер: " + browserName);
+        if (browserName == null) {
+            browserName = System.getProperty("browser", "chrome");
         }
-        driver.manage().window().maximize();
-        return driver;
+
+        switch (browserName.toLowerCase()) {
+            case "firefox":
+                FirefoxOptions ffOptions = new FirefoxOptions();
+                ffOptions.addArguments("--start-maximized");
+                if (Boolean.getBoolean("headless")) ffOptions.addArguments("-headless");
+                return WebDriverManager.firefoxdriver().capabilities(ffOptions).create();
+
+            case "edge":
+                EdgeOptions edgeOptions = new EdgeOptions();
+                edgeOptions.addArguments("--start-maximized");
+                if (Boolean.getBoolean("headless")) edgeOptions.addArguments("--headless");
+                return WebDriverManager.edgedriver().capabilities(edgeOptions).create();
+
+            default: // chrome
+                ChromeOptions chromeOptions = new ChromeOptions();
+                chromeOptions.addArguments("--start-maximized");
+                chromeOptions.addArguments("--disable-notifications");
+                if (Boolean.getBoolean("headless")) {
+                    chromeOptions.addArguments("--headless=new");
+                    chromeOptions.addArguments("--window-size=1920,1080");
+                }
+                return WebDriverManager.chromedriver().capabilities(chromeOptions).create();
+        }
     }
 }
