@@ -45,7 +45,8 @@ public class WishlistE2ETest extends BaseTest {
         registerPage.register(user, user + "@test.com", pass);
         loginPage.login(user, pass);
 
-        Assertions.assertFalse(driver.getCurrentUrl().contains("/login"), "Не должны быть на странице логина");
+        // Проверяем что попали на страницу со списками через уникальный элемент
+        wishlistsPage.assertUserOnWishlistsPage();
         logger.info("✅ Тест 2 пройден: Авторизация успешна");
     }
 

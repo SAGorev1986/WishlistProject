@@ -1,9 +1,6 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +55,15 @@ public class WishlistsPage extends BasePage {
     public void assertWishlistDetailsOpened(String title) {
         if (!driver.getPageSource().contains(title)) {
             throw new AssertionError("Должны находиться на странице деталей списка '" + title + "'");
+        }
+    }
+    public void assertUserOnWishlistsPage() {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(createListBtn));
+            logger.info("✅ Пользователь успешно авторизован и находится на странице со списками");
+        } catch (TimeoutException e) {
+            throw new AssertionError("Не удалось обнаружить страницу со списками. " +
+                    "Возможно, логин не сработал или открылась другая страница.");
         }
     }
 }
